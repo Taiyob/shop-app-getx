@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:shop_app_getx/api_connection/api_connection.dart';
 import 'package:shop_app_getx/users/authentication/log_in_screen.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop_app_getx/users/model/user.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -26,7 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           Uri.parse(API.validateEmail),
           body: {
             'user_email' : emailController.text.trim(),
-          }
+          },
         );
         if(res.statusCode == 200){
            var resBodyOfValidateEmail = jsonDecode(res.body);
@@ -37,11 +38,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
            }
         }
       } catch(e){
-
+        print(e.toString());
+        Fluttertoast.showToast(msg: e.toString());
       }
     }
   registerAndSaveUserRecord() async{
-    
+    User userModel = User(
+          1,
+      nameController.text.trim(),
+      emailController.text.trim(),
+      passwordController.text.trim(),
+    );
+    try{
+      var res = await http.post(Uri.parse(API.signUp),
+        body: userModel.toJson(),
+      );
+      if(res.statusCode == 200){
+        var resBodyOfSignUp = jsonDecode(res.body);
+        if(resBodyOfSignUp['success'] == true){
+            Fluttertoast.showToast(msg: 'Registered Successfully');
+        } else{
+          Fluttertoast.showToast(msg: 'Error!!! Try again',);
+        }
+      }
+    } catch(e){
+      print(e.toString());
+      Fluttertoast.showToast(msg: e.toString());
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -185,7 +208,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                child: InkWell(
                                  onTap: (){
                                    if(formKey.currentState!.validate()){
-
+                                     validateUserEmail();
                                    }
                                  },
                                  borderRadius: BorderRadius.circular(30),
